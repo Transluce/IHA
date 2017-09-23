@@ -25,12 +25,8 @@ class CleanTextTransformer(TransformerMixin):
     """
     Convert text to cleaned text
     """
-engine = pyttsx3.init()
-#rate = engine.getProperty('rate')
-#engine.setProperty('rate', rate+10)
-voices = engine.getProperty('voices')
-for voice in voices:
-    engine.setProperty('voice',voices[1].id)
+
+
     def transform(self, X, **transform_params):
         return [cleanText(text) for text in X]
 
@@ -84,7 +80,12 @@ def tokenizeText(sample):
         tokens.remove("\n\n")
 
     return tokens
-
+engine = pyttsx3.init()
+#rate = engine.getProperty('rate')
+#engine.setProperty('rate', rate+10)
+voices = engine.getProperty('voices')
+for voice in voices:
+    engine.setProperty('voice',voices[1].id)
 def Lights_On(location):
    def allLights():
        print("All lights are turned on")
