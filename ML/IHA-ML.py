@@ -14,22 +14,17 @@ from sklearn.metrics import accuracy_score
 from nltk.corpus import stopwords
 import string
 import re
-import pyttsx3
 import spacy
 from spacy.en import English
 STOPLIST = set(stopwords.words('english') + ["n't", "'s", "'m", "ca"] + list(ENGLISH_STOP_WORDS))
 # List of symbols we don't care about
 SYMBOLS = " ".join(string.punctuation).split(" ") + ["-----", "---", "...", "“", "”", "'ve"]
+parser=English()
 class CleanTextTransformer(TransformerMixin):
     """
     Convert text to cleaned text
     """
-engine = pyttsx3.init()
-rate = engine.getProperty('rate')
-engine.setProperty('rate', rate+10)
-voices = engine.getProperty('voices')
-for voice in voices:
-    engine.setProperty('voice',voices[1].id)
+
     def transform(self, X, **transform_params):
         return [cleanText(text) for text in X]
 
@@ -57,7 +52,6 @@ def cleanText(text):
 # A custom function to tokenize the text using spaCy
 # and convert to lemmas
 def tokenizeText(sample):
-
     # get the tokens using spaCy
     tokens = parser(sample)
 
@@ -88,16 +82,10 @@ def tokenizeText(sample):
 def Lights_On(location):
    def allLights():
        print("All lights are turned on")
-       engine.say('All lights are turned on')
-       engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned on")
-       engine.say('Kitchen lights are turned on')
-       engine.runAndWait()
    def livingRoomLights():
        print("Living room lights are turned on")
-       engine.say('Living room lights are turned on')
-       engine.runAndWait()
    case={"all":allLights,
          "kitchen":kitchenLights,
          "livingRoom":livingRoomLights}
@@ -105,16 +93,10 @@ def Lights_On(location):
 def Lights_Off(location):
    def allLights():
        print("All lights are turned off")
-       engine.say('All lights are turned off')
-       engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned off")
-       engine.say('Kitchen lights are turned off')
-       engine.runAndWait()
    def livingRoomLights():
        print("Living room lights are turned off")
-       engine.say('Living room lights are turned off')
-       engine.runAndWait()
    case={"all":allLights,
          "kitchen":kitchenLights,
          "livingRoom":livingRoomLights}
