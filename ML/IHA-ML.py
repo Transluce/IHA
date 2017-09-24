@@ -80,6 +80,8 @@ def tokenizeText(sample):
         tokens.remove("\n\n")
 
     return tokens
+
+#text to speech
 engine = pyttsx3.init()
 #rate = engine.getProperty('rate')
 #engine.setProperty('rate', rate+10)
@@ -129,31 +131,47 @@ commands = ["turn off the lights","turn off the lights in the living room","turn
 commandLabel = ["lights-all=off", "lights-livingRoom=off", "lights-kitchen=off", "television-livingRoom=off", "lights-all=on", "lights-all=on", "lights-kitchen=on","lights-all=on","lights-all=off","lights-all=off"]
 #train
 pipeline.fit(commands, commandLabel)
-#speech to text
-r = sr.Recognizer()                                                                                   
-with sr.Microphone() as source:                                                                       
-    print("Speak:")                                                                                   
-    audio = r.listen(source)   
 
-    speech = [r.recognize_google(audio)]
+#speech to text
+
+condition =False
+
+while condition ==False:
     
+    r = sr.Recognizer()                                                                                   
+    with sr.Microphone() as source:                                                                       
+        print("Speak:")                                                                   
+        audio = r.listen(source)  
+        try:
+            speech = [r.recognize_google(audio)]
+            print (speech)
+            condition =True
+     
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            condition =False
+
+#def mainfunction(source):
+    
+    if condition ==True:
 #Predict
-preds=pipeline.predict(speech)
-predString=str(preds)
-predString=predString[2:len(predString)-2]
+        preds=pipeline.predict(speech)
+        predString=str(preds)
+        predString=predString[2:len(predString)-2]
 #Get intent
-intent=predString.split('-')[0]
+        intent=predString.split('-')[0]
 #Get location
-location=predString.split('-')[1].split('=')[0]
+        location=predString.split('-')[1].split('=')[0]
 #Get Action
-act=predString.split('-')[1].split('=')[1]
-if intent=="lights":
-    action={"on":Lights_On,
-            "off":Lights_Off
-            }
-    action[act](location)
-if intent=="television":
-    print("tv")
+        act=predString.split('-')[1].split('=')[1]
+        if intent=="lights":
+            action={"on":Lights_On,
+                    "off":Lights_Off
+                    }
+            action[act](location)
+        if intent=="television":
+            print("tv")
+        condition=0
 """
 for(sample,pred) in zip(test,preds):
    print(sample, ":", pred) 
