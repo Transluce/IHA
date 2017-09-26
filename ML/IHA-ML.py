@@ -14,15 +14,18 @@ from sklearn.metrics import accuracy_score
 from nltk.corpus import stopwords
 import string
 import re
+import pyttsx3
 import spacy
 from spacy.en import English
 STOPLIST = set(stopwords.words('english') + ["n't", "'s", "'m", "ca"] + list(ENGLISH_STOP_WORDS))
 # List of symbols we don't care about
 SYMBOLS = " ".join(string.punctuation).split(" ") + ["-----", "---", "...", "“", "”", "'ve"]
+parser=English()
 class CleanTextTransformer(TransformerMixin):
     """
     Convert text to cleaned text
     """
+
 
     def transform(self, X, **transform_params):
         return [cleanText(text) for text in X]
@@ -51,7 +54,6 @@ def cleanText(text):
 # A custom function to tokenize the text using spaCy
 # and convert to lemmas
 def tokenizeText(sample):
-
     # get the tokens using spaCy
     tokens = parser(sample)
 
@@ -79,13 +81,26 @@ def tokenizeText(sample):
 
     return tokens
 
+#text to speech
+engine = pyttsx3.init()
+#rate = engine.getProperty('rate')
+#engine.setProperty('rate', rate+10)
+voices = engine.getProperty('voices')
+for voice in voices:
+    engine.setProperty('voice',voices[1].id)
 def Lights_On(location):
    def allLights():
        print("All lights are turned on")
+       engine.say('All lights are turned on')
+       engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned on")
+       engine.say('Kitchen lights are turned on')
+       engine.runAndWait()
    def livingRoomLights():
        print("Living room lights are turned on")
+       engine.say('Living room lights are turned on')
+       engine.runAndWait()
    case={"all":allLights,
          "kitchen":kitchenLights,
          "livingRoom":livingRoomLights}
@@ -93,15 +108,20 @@ def Lights_On(location):
 def Lights_Off(location):
    def allLights():
        print("All lights are turned off")
+       engine.say('All lights are turned off')
+       engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned off")
+       engine.say('Kitchen lights are turned off')
+       engine.runAndWait()
    def livingRoomLights():
        print("Living room lights are turned off")
+       engine.say('Living room lights are turned off')
+       engine.runAndWait()
    case={"all":allLights,
          "kitchen":kitchenLights,
          "livingRoom":livingRoomLights}
    case[location]()
-        
 nlp=spacy.load('en')
 vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
 clf = LinearSVC()
@@ -111,31 +131,47 @@ commands = ["turn off the lights","turn off the lights in the living room","turn
 commandLabel = ["lights-all=off", "lights-livingRoom=off", "lights-kitchen=off", "television-livingRoom=off", "lights-all=on", "lights-all=on", "lights-kitchen=on","lights-all=on","lights-all=off","lights-all=off"]
 #train
 pipeline.fit(commands, commandLabel)
-#speech to text
-r = sr.Recognizer()                                                                                   
-with sr.Microphone() as source:                                                                       
-    print("Speak:")                                                                                   
-    audio = r.listen(source)   
 
-    speech = [r.recognize_google(audio)]
+#speech to text
+
+condition =False
+
+while condition ==False:
     
+    r = sr.Recognizer()                                                                                   
+    with sr.Microphone() as source:                                                                       
+        print("Speak:")                                                                   
+        audio = r.listen(source)  
+        try:
+            speech = [r.recognize_google(audio)]
+            print (speech)
+            condition =True
+     
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            condition =False
+
+#def mainfunction(source):
+    
+    if condition ==True:
 #Predict
-preds=pipeline.predict(speech)
-predString=str(preds)
-predString=predString[2:len(predString)-2]
+        preds=pipeline.predict(speech)
+        predString=str(preds)
+        predString=predString[2:len(predString)-2]
 #Get intent
-intent=predString.split('-')[0]
+        intent=predString.split('-')[0]
 #Get location
-location=predString.split('-')[1].split('=')[0]
+        location=predString.split('-')[1].split('=')[0]
 #Get Action
-act=predString.split('-')[1].split('=')[1]
-if intent=="lights":
-    action={"on":Lights_On,
-            "off":Lights_Off
-            }
-    action[act](location)
-if intent=="television":
-    print("tv")
+        act=predString.split('-')[1].split('=')[1]
+        if intent=="lights":
+            action={"on":Lights_On,
+                    "off":Lights_Off
+                    }
+            action[act](location)
+        if intent=="television":
+            print("tv")
+        condition=0
 """
 for(sample,pred) in zip(test,preds):
    print(sample, ":", pred) 
