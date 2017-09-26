@@ -122,6 +122,21 @@ def Lights_Off(location):
          "kitchen":kitchenLights,
          "livingRoom":livingRoomLights}
    case[location]()
+def predict():
+    #Get intent
+    intent=predString.split('-')[0]
+    #Get location
+    location=predString.split('-')[1].split('=')[0]
+    #Get Action
+    act=predString.split('-')[1].split('=')[1]
+    if intent=="lights":
+        action={"on":Lights_On,
+                "off":Lights_Off
+                }
+        action[act](location)
+    if intent=="television":
+        print("tv")
+           
 nlp=spacy.load('en')
 vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
 clf = LinearSVC()
@@ -135,7 +150,7 @@ pipeline.fit(commands, commandLabel)
 #speech to text
 
 condition =False
-
+response=False
 while condition ==False:
     
     r = sr.Recognizer()                                                                                   
@@ -158,20 +173,37 @@ while condition ==False:
         preds=pipeline.predict(speech)
         predString=str(preds)
         predString=predString[2:len(predString)-2]
-#Get intent
-        intent=predString.split('-')[0]
-#Get location
-        location=predString.split('-')[1].split('=')[0]
-#Get Action
-        act=predString.split('-')[1].split('=')[1]
-        if intent=="lights":
-            action={"on":Lights_On,
-                    "off":Lights_Off
-                    }
-            action[act](location)
-        if intent=="television":
-            print("tv")
-        condition=0
+        if predString not in commands:
+            aiPrediction=predString.split('=')[1]
+            print("Do you want me to turn it "+aiPrediction)
+            engine.say("Do you want me to turn it "+aiPrediction)
+            engine.runAndWait()
+            while response==False:
+                 with sr.Microphone() as source:                                                                       
+                     print("Speak:")
+                     audio = r.listen(source)
+                     try:
+                         speech = [r.recognize_google(audio)]
+                         print(speech[0])
+                         if speech[0]=="yes":
+                             commands.extend(speech)
+                             commandLabel.append(predString)
+                             print(commandLabel)
+                             response=True
+                         elif speech[0]=="no":
+                             commands.extend(speech)
+                             predStringNew=predString[0:len(predString)-2]
+                             if predString[len(predString)-2:len(predString)]=="on":
+                                 predStringNew+="off"
+                             else:
+                                 predStringNew+="on"
+                             commandLabel.append(predStringNew)
+                     except sr.UnknownValueError:
+                        print("Could not understand audio")
+        predict()
+    else:
+            predict()
+            condition=False
 """
 for(sample,pred) in zip(test,preds):
    print(sample, ":", pred) 
