@@ -190,26 +190,19 @@ while condition ==False:
                              commandLabel.append(predString)
                              print(commandLabel)
                              response=True
+                         elif speech[0]=="no":
+                             commands.extend(speech)
+                             predStringNew=predString[0:len(predString)-2]
+                             if predString[len(predString)-2:len(predString)]=="on":
+                                 predStringNew+="off"
+                             else:
+                                 predStringNew+="on"
+                             commandLabel.append(predStringNew)
                      except sr.UnknownValueError:
                         print("Could not understand audio")
         predict()
     else:
             predict()
-            """
-            #Get intent
-            intent=predString.split('-')[0]
-            #Get location
-            location=predString.split('-')[1].split('=')[0]
-            #Get Action
-            act=predString.split('-')[1].split('=')[1]
-            if intent=="lights":
-                action={"on":Lights_On,
-                        "off":Lights_Off
-                        }
-                action[act](location)
-            if intent=="television":
-                print("tv")
-            """
             condition=False
 """
 for(sample,pred) in zip(test,preds):
