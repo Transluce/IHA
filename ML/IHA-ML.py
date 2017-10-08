@@ -141,9 +141,16 @@ nlp=spacy.load('en')
 vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
 clf = LinearSVC()
 pipeline=Pipeline([("cleanText",CleanTextTransformer()),("vectorizer",vectorizer),("clf",clf)])
+commands_file=open("commands.ibf","r+")
+commandsLabel_file=open("commands_label.ibf","r+")
+commands_file.seek(0)
+commandsLabel_file.seek(0)
 #commandsDataSet
-commands = ["turn off the lights","turn off the lights in the living room","turn off the lights in the kitchen","turn off the television","turn on the lights","turn on all the lights", "turn on the lights in the kitchen","turn the lights on","turn off all the lights","turn the lights off"]
-commandLabel = ["lights-all=off", "lights-livingRoom=off", "lights-kitchen=off", "television-livingRoom=off", "lights-all=on", "lights-all=on", "lights-kitchen=on","lights-all=on","lights-all=off","lights-all=off"]
+#commands = ["turn off the lights","turn off the lights in the living room","turn off the lights in the kitchen","turn off the television","turn on the lights","turn on all the lights", "turn on the lights in the kitchen","turn the lights on","turn off all the lights","turn the lights off"]
+#commandLabel = ["lights-all=off", "lights-livingRoom=off", "lights-kitchen=off", "television-livingRoom=off", "lights-all=on", "lights-all=on", "lights-kitchen=on","lights-all=on","lights-all=off","lights-all=off"]
+commands=commands_file.read().split(",")
+commandLabel=commandsLabel_file.read().split(",")
+
 #train
 pipeline.fit(commands, commandLabel)
 
@@ -171,9 +178,9 @@ while condition ==False:
     if condition ==True:
 #Predict
         preds=pipeline.predict(speech)
-        predString=str(preds)
-        predString=predString[2:len(predString)-2]
-        if predString not in commands:
+        predString=str(preds[0])
+        #predString=predString[2:len(predString)-2]
+        if predString in commands:
             aiPrediction=predString.split('=')[1]
             print("Do you want me to turn it "+aiPrediction)
             engine.say("Do you want me to turn it "+aiPrediction)
@@ -183,27 +190,35 @@ while condition ==False:
                      print("Speak:")
                      audio = r.listen(source)
                      try:
-                         speech = [r.recognize_google(audio)]
-                         print(speech[0])
-                         if speech[0]=="yes":
+                         responseSpeech = [r.recognize_google(audio)]
+                         print(responseSpeech[0])
+                         if responseSpeech[0]=="yes":
+                             commands_file.write(str(","+speech[0]))
+                             commandsLabel_file.write(str(","+predString))
                              commands.extend(speech)
                              commandLabel.append(predString)
-                             print(commandLabel)
+                             print(commands)
                              response=True
-                         elif speech[0]=="no":
+                         elif responseSpeech[0]=="no":
                              commands.extend(speech)
+                             commands_file.write(str(","+speech[0]))
                              predStringNew=predString[0:len(predString)-2]
                              if predString[len(predString)-2:len(predString)]=="on":
                                  predStringNew+="off"
                              else:
                                  predStringNew+="on"
                              commandLabel.append(predStringNew)
+                             commandsLabel_file.write(str(","+predStringNew))
+                             predString=predStringNew
+                             response=True
                      except sr.UnknownValueError:
                         print("Could not understand audio")
-        predict()
-    else:
+            predict()
+        else:
             predict()
             condition=False
+commands_file.close()
+commandsLabel_file.close()
 """
 for(sample,pred) in zip(test,preds):
    print(sample, ":", pred) 
