@@ -16,6 +16,7 @@ import string
 import re
 import pyttsx3
 import spacy
+from IHA_Command import predict
 from spacy.en import English
 STOPLIST = set(stopwords.words('english') + ["n't", "'s", "'m", "ca"] + list(ENGLISH_STOP_WORDS))
 # List of symbols we don't care about
@@ -88,54 +89,7 @@ engine = pyttsx3.init()
 voices = engine.getProperty('voices')
 for voice in voices:
     engine.setProperty('voice',voices[1].id)
-def Lights_On(location):
-   def allLights():
-       print("All lights are turned on")
-       engine.say('All lights are turned on')
-       engine.runAndWait()
-   def kitchenLights():
-       print("Kitchen lights are turned on")
-       engine.say('Kitchen lights are turned on')
-       engine.runAndWait()
-   def livingRoomLights():
-       print("Living room lights are turned on")
-       engine.say('Living room lights are turned on')
-       engine.runAndWait()
-   case={"all":allLights,
-         "kitchen":kitchenLights,
-         "livingRoom":livingRoomLights}
-   case[location]()
-def Lights_Off(location):
-   def allLights():
-       print("All lights are turned off")
-       engine.say('All lights are turned off')
-       engine.runAndWait()
-   def kitchenLights():
-       print("Kitchen lights are turned off")
-       engine.say('Kitchen lights are turned off')
-       engine.runAndWait()
-   def livingRoomLights():
-       print("Living room lights are turned off")
-       engine.say('Living room lights are turned off')
-       engine.runAndWait()
-   case={"all":allLights,
-         "kitchen":kitchenLights,
-         "livingRoom":livingRoomLights}
-   case[location]()
-def predict():
-    #Get intent
-    intent=predString.split('-')[0]
-    #Get location
-    location=predString.split('-')[1].split('=')[0]
-    #Get Action
-    act=predString.split('-')[1].split('=')[1]
-    if intent=="lights":
-        action={"on":Lights_On,
-                "off":Lights_Off
-                }
-        action[act](location)
-    if intent=="television":
-        print("tv")
+
            
 nlp=spacy.load('en')
 vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
@@ -179,8 +133,9 @@ while condition ==False:
 #Predict
         preds=pipeline.predict(speech)
         predString=str(preds[0])
+        print(predString)
         #predString=predString[2:len(predString)-2]
-        if predString in commands:
+        if speech[0] not in commands:
             aiPrediction=predString.split('=')[1]
             print("Do you want me to turn it "+aiPrediction)
             engine.say("Do you want me to turn it "+aiPrediction)
@@ -213,9 +168,9 @@ while condition ==False:
                              response=True
                      except sr.UnknownValueError:
                         print("Could not understand audio")
-            predict()
+            predict(predString)
         else:
-            predict()
+            predict(predString)
             condition=False
 commands_file.close()
 commandsLabel_file.close()
