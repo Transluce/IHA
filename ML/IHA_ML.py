@@ -157,10 +157,12 @@ while condition ==False:
                          elif responseSpeech[0]=="no":
                              commands.extend(speech)
                              commands_file.write(str(","+speech[0]))
-                             predStringNew=predString[0:len(predString)-2]
+                             
                              if predString[len(predString)-2:len(predString)]=="on":
+                                 predStringNew=predString[0:len(predString)-2]
                                  predStringNew+="off"
                              else:
+                                 predStringNew=predString[0:len(predString)-3]
                                  predStringNew+="on"
                              commandLabel.append(predStringNew)
                              commandsLabel_file.write(str(","+predStringNew))
