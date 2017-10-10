@@ -19,4 +19,3 @@ print(x)
 url = "https://www.google.com.ph/search?q="
 url2 = url + search
 webbrowser.open(url2,new=new)
-
