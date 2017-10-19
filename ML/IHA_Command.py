@@ -5,7 +5,7 @@ Created on Tue Oct 10 02:29:27 2017
 @author: jm
 """
 import pyttsx3
-import IHA_Out
+#import IHA_Out
 engine = pyttsx3.init()
 #rate = engine.getProperty('rate')
 #engine.setProperty('rate', rate+10)
@@ -19,7 +19,7 @@ def Lights_On(location):
        engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned on")
-       IHA_Out.TurnOn(9)
+       #IHA_Out.TurnOn(9)
        #engine.say('Kitchen lights are turned on')
        #engine.runAndWait()
    def livingRoomLights():
@@ -37,7 +37,7 @@ def Lights_Off(location):
        engine.runAndWait()
    def kitchenLights():
        print("Kitchen lights are turned off")
-       IHA_Out.TurnOff(9)
+       #IHA_Out.TurnOff(9)
       # engine.say('Kitchen lights are turned off')
       # engine.runAndWait()
    def livingRoomLights():

@@ -16,7 +16,7 @@ class Arduino():
             port = ports[i]
             strPort = str(port)
         
-            if 'Communications' in strPort: 
+            if 'Communications' in strPort or 'Arduino' in strPort: 
                 splitPort = strPort.split(' ')
                 comPort = (splitPort[0])
 
