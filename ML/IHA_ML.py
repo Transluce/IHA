@@ -81,61 +81,11 @@ def tokenizeText(sample):
         tokens.remove("\n\n")
 
     return tokens
-
-#text to speech
-engine = pyttsx3.init()
-#rate = engine.getProperty('rate')
-#engine.setProperty('rate', rate+10)
-voices = engine.getProperty('voices')
-for voice in voices:
-    engine.setProperty('voice',voices[1].id)
-
-           
-nlp=spacy.load('en')
-vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
-clf = LinearSVC()
-pipeline=Pipeline([("cleanText",CleanTextTransformer()),("vectorizer",vectorizer),("clf",clf)])
-commands_file=open("commands.ibf","r+")
-commandsLabel_file=open("commands_label.ibf","r+")
-commands_file.seek(0)
-commandsLabel_file.seek(0)
-#commandsDataSet
-#commands = ["turn off the lights","turn off the lights in the living room","turn off the lights in the kitchen","turn off the television","turn on the lights","turn on all the lights", "turn on the lights in the kitchen","turn the lights on","turn off all the lights","turn the lights off"]
-#commandLabel = ["lights-all=off", "lights-livingRoom=off", "lights-kitchen=off", "television-livingRoom=off", "lights-all=on", "lights-all=on", "lights-kitchen=on","lights-all=on","lights-all=off","lights-all=off"]
-commands=commands_file.read().split(",")
-commandLabel=commandsLabel_file.read().split(",")
-
-#train
-pipeline.fit(commands, commandLabel)
-
-#speech to text
-
-condition =False
-response=False
-while condition ==False:
-    
-    r = sr.Recognizer()                                                                                   
-    with sr.Microphone() as source:                                                                       
-        print("Speak:")                                                                   
-        audio = r.listen(source)  
-        try:
-            speech = [r.recognize_google(audio)]
-            print (speech)
-            condition =True
-     
-        except sr.UnknownValueError:
-            print("Could not understand audio")
-            condition =False
-
-#def mainfunction(source):
-    
-    if condition ==True:
-#Predict
-        preds=pipeline.predict(speech)
-        predString=str(preds[0])
-        print(predString)
-        #predString=predString[2:len(predString)-2]
-        if speech[0] not in commands:
+#light intent
+def lights():
+    global response,condition,predString
+    print(commands)
+    if speech[0] not in commands:
             aiPrediction=predString.split('=')[1]
             print("Do you want me to turn it "+aiPrediction)
             engine.say("Do you want me to turn it "+aiPrediction)
@@ -171,15 +121,79 @@ while condition ==False:
                      except sr.UnknownValueError:
                         print("Could not understand audio")
             predict(predString)
-        else:
-            predict(predString)
-            condition=False
+    else:
+        predict(predString)
+        condition=False
+def searcher():
+    from IHA_GoogleSearch import search
+    print("'"+speech[0]+"'")
+    doc=nlp(speech[0])
+    #print(doc[0].text, doc[0].ent_iob, doc[0].ent_type_)
+    entityCount=0
+    nouns=[]
+    for word in doc:
+        if word.pos_=="NOUN":
+            entityCount+=1
+            nouns.append(word.text)
+        print(word.pos_)
+    if entityCount==2:
+        searchString=nouns[1]
+    else:
+        searchString=speech[0]
+    #searchString=speech[0].split()[2]
+    search(searchString)
+#Start of Program
+engine = pyttsx3.init()
+voices = engine.getProperty('voices')
+for voice in voices:
+    engine.setProperty('voice',voices[1].id)
+#Loading English model of spacy
+nlp=spacy.load('en')
+vectorizer = CountVectorizer(tokenizer=tokenizeText, ngram_range=(1,1))
+clf = LinearSVC()
+pipeline=Pipeline([("cleanText",CleanTextTransformer()),("vectorizer",vectorizer),("clf",clf)])
+#Get commands
+commands_file=open("commands.ibf","r+")
+commandsLabel_file=open("commands_label.ibf","r+")
+commands_file.seek(0)
+commandsLabel_file.seek(0)
+commands=commands_file.read().split(",")
+commandLabel=commandsLabel_file.read().split(",")
+
+#train
+pipeline.fit(commands, commandLabel)
+condition =False
+response=False
+while condition ==False:
+    
+    r = sr.Recognizer()                                                                                   
+    with sr.Microphone() as source:                                                                       
+        print("Speak:")                                                                   
+        audio = r.listen(source)  
+        try:
+            speech = [r.recognize_google(audio)]
+            print (speech)
+            condition =True
+     
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+            condition =False
+
+#def mainfunction(source):
+    
+    if condition ==True:
+#Predict
+        preds=pipeline.predict(speech)
+        predString=str(preds[0])
+        print(predString)
+        string=predString.split('-')[0]
+        #predString=predString[2:len(predString)-2]
+        case={"lights":lights,
+              "search":searcher
+              }
+        case[string]()
 commands_file.close()
-commandsLabel_file.close()
-"""
-for(sample,pred) in zip(test,preds):
-   print(sample, ":", pred) 
-"""
+commandsLabel_file.close()  
 
    
        
